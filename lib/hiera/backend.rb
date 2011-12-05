@@ -90,6 +90,12 @@ class Hiera
                         var = $1
                         val = scope[var] || extra_data[var] || ""
 
+                        # Parse puppet-style facts  ::fact
+                        if val=="" && var.match(/^::(.*)/)
+                          stripped_var = $1
+                          val = scope[stripped_var] || extra_data[stripped_var] || ""
+                        end
+
                         # Puppet can return this for unknown scope vars
                         val = "" if val == :undefined
 
