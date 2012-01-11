@@ -1,7 +1,21 @@
 require 'rubygems'
 require 'rubygems/package_task'
-require 'rspec/core/rake_task'
 require 'tasks/release.rb'
+
+begin
+  require 'rspec/core/rake_task'
+
+  desc "Run all specs"
+  RSpec::Core::RakeTask.new(:test) do |t|
+    t.pattern = 'spec/**/*_spec.rb'
+    t.rspec_opts = File.read("spec/spec.opts").chomp || ""
+  end
+rescue LoadError
+  task :test do
+    warn "RSpec is not installed: skipping tests"
+  end
+end
+
 
 spec = Gem::Specification.new do |s|
   s.name = "hiera"
@@ -22,12 +36,6 @@ end
 
 Gem::PackageTask.new(spec) do |pkg|
   pkg.need_tar = true
-end
-
-desc "Run all specs"
-RSpec::Core::RakeTask.new(:test) do |t|
-    t.pattern = 'spec/**/*_spec.rb'
-    t.rspec_opts = File.read("spec/spec.opts").chomp || ""
 end
 
 task :default => [:test, :repackage]
