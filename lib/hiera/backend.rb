@@ -87,8 +87,10 @@ class Hiera
 
                 if tdata.is_a?(String)
                     while tdata =~ /%\{(.+?)\}/
-                        var = $1
-                        val = scope[var] || extra_data[var] || ""
+                        begin
+                          var = $1
+                          val = scope[var] || extra_data[var] || ""
+                        end until val != "" || var !~ /::(.+)/
 
                         # Parse puppet-style facts  ::fact
                         if val=="" && var.match(/^::(.*)/)
@@ -99,7 +101,7 @@ class Hiera
                         # Puppet can return this for unknown scope vars
                         val = "" if val == :undefined
 
-                        tdata.gsub!(/%\{#{var}\}/, val)
+                        tdata.gsub!(/%\{(::)?#{var}\}/, val)
                     end
                 end
 
